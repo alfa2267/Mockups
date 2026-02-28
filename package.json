@@ -1,0 +1,35 @@
+{
+  "name": "mockups",
+  "version": "1.0.0",
+  "description": "A modern portfolio website showcasing 2D and 3D design mockups, accessible at **mockups.ainaeco.uk**.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alfa2267/Mockups.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alfa2267/Mockups/issues"
+  },
+  "homepage": "https://github.com/alfa2267/Mockups#readme",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.2",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.9.3",
+    "vite": "^5.0.8"
+  }
+}

@@ -1,0 +1,61 @@
+name: Sentinel Uptime Monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: sentinel-uptime-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE_NAME: "mockups"
+      SITE_URL: "https://mockups.ainaeco.uk"
+      ISSUE_TITLE: "[Sentinel] Site down: https://mockups.ainaeco.uk"
+    steps:
+      - name: Check endpoint
+        id: health
+        shell: bash
+        run: |
+          set +e
+          curl -fsS --max-time 20 --retry 2 --retry-delay 3 "$SITE_URL" >/dev/null
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "down=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "down=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open issue if down
+        if: steps.health.outputs.down == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing=$(gh issue list --state open --search "$ISSUE_TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh issue create --title "$ISSUE_TITLE" --body "Sentinel detected downtime for $SITE_NAME ($SITE_URL).\n\n- Detected at: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n- Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\nThis issue auto-closes on recovery."
+          fi
+
+      - name: Close issue when recovered
+        if: steps.health.outputs.down == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          open_issue=$(gh issue list --state open --search "$ISSUE_TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$open_issue" ]; then
+            gh issue comment "$open_issue" --body "Recovery confirmed at $(date -u +'%Y-%m-%d %H:%M:%S UTC'). Closing incident."
+            gh issue close "$open_issue"
+          fi

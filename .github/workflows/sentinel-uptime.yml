@@ -39,6 +39,7 @@ jobs:
         if: steps.health.outputs.down == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -51,6 +52,7 @@ jobs:
         if: steps.health.outputs.down == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
